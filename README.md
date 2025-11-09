@@ -20,7 +20,7 @@ Simula la interfaz de una plataforma financiera que permite:
 
 ## 🗂️ Estructura de archivos
 
-CreditSmart/
+``` CreditSmart/
 │
 ├── index.html # Página principal - Catálogo de créditos
 ├── simulador.html # Página de búsqueda / simulador visual
@@ -30,14 +30,15 @@ CreditSmart/
 │ └── styles.css # Estilos personalizados (colores, cards, formularios)
 │
 ├── img/
-│ ├── credito-libre.png
-│ ├── credito-vehiculo.png
+│ ├── credito-libreinversion.png
+│ ├── credito-carro.png
 │ ├── credito-vivienda.png
-│ ├── credito-educativo.png
+│ ├── credito-educacion.png
 │ ├── credito-empresarial.png
 │ └── credito-nomina.png
 │
 └── README.md # Documentación del proyecto
+```
 
 
 ## ⚙️ Instrucciones para ejecutar el proyecto
@@ -69,4 +70,3 @@ Los íconos utilizados en este proyecto fueron descargados desde
 - **CSS3** — diseño y personalización de estilos.  
 - **Bootstrap 5 (CDN)** — framework para diseño responsive.  
 - **Git / GitHub** — control de versiones y documentación del proyecto.
-
