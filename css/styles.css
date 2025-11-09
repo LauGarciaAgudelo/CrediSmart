@@ -1,0 +1,189 @@
+/* ==========================================================
+   Archivo: styles.css
+   Proyecto: CreditSmart
+   Descripción: Estilos personalizados para las tres páginas.
+   Autor: [Tu nombre]
+   ========================================================== */
+
+/* ---------- Paleta de colores ---------- */
+:root {
+  --primary-color: #0052cc;      /* Azul profesional */
+  --secondary-color: #25a55f;    /* Verde financiero */
+  --accent-color: #ffcc66;       /* Dorado suave */
+  --text-color: #333333;         /* Gris oscuro */
+  --text-secondary: #666666;     /* Gris medio */
+  --bg-color: #f5f7fa;           /* Fondo claro */
+}
+
+/* ---------- Estilo general ---------- */
+body {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5 {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+/* ---------- Navegación ---------- */
+.navbar {
+  background-color: var(--primary-color);
+}
+
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.navbar-nav .nav-link {
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--accent-color);
+}
+
+/* ---------- Secciones ---------- */
+section.bg-light {
+  background: linear-gradient(135deg, #e9f3ff, #ffffff);
+}
+
+section h1, section h2 {
+  font-weight: 700;
+}
+
+section p.lead {
+  color: var(--text-secondary);
+}
+
+/* ---------- Cards del catálogo (versión compacta) ---------- */
+.credit-card {
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: #fff;
+  height: 100%;
+  padding: 0.5rem 0.5rem 0.8rem 0.5rem;
+}
+
+.credit-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+/* Imagen más pequeña y centrada */
+.credit-card img {
+  max-width: 120px;
+  margin: 8px auto;
+  display: block;
+  opacity: 0.9;
+}
+
+/* Título más pequeño */
+.credit-card .card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+/* Texto más compacto */
+.credit-card .card-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  min-height: 35px;
+  margin-bottom: 0.4rem;
+}
+
+/* Lista más corta */
+.credit-card ul {
+  font-size: 0.8rem;
+  color: var(--text-color);
+  margin-bottom: 0.4rem;
+}
+
+/* Botón dentro de la card */
+.credit-card .btn {
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-color: var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.credit-card .btn:hover {
+  background-color: var(--secondary-color);
+  color: #fff;
+}
+
+/* ---------- Formularios ---------- */
+form.card {
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+}
+
+form label {
+  font-weight: 500;
+}
+
+form input, form select, form textarea {
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+form input:focus, form select:focus, form textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.25);
+}
+
+/* Botones generales */
+button.btn-primary {
+  background-color: var(--secondary-color);
+  border: none;
+}
+
+button.btn-primary:hover {
+  background-color: #1e8e53;
+}
+
+button.btn-outline-secondary:hover {
+  background-color: #f0f0f0;
+}
+
+/* ---------- Pie de página ---------- */
+footer {
+  background-color: var(--primary-color);
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  .credit-card img {
+    max-width: 40px;
+  }
+
+  .credit-card .card-title {
+    font-size: 0.95rem;
+  }
+
+  .credit-card .card-text {
+    font-size: 0.8rem;
+  }
+}
