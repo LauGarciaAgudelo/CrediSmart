@@ -1,6 +1,6 @@
 # 💳 CreditSmart - Sistema de Gestión de Solicitudes de Crédito
 
-**Nombre del estudiante:** Laura Vanessa García Agudelo 
+**Nombre del estudiante:** Laura Vanessa García Agudelogit config user.name
 **Asignatura:** Ingeniería Web I  
 **Actividad:** Diseño de Interfaces Web – CreditSmart  
 **Año:** 2025
