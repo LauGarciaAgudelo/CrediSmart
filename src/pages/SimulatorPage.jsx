@@ -7,12 +7,12 @@ function SimulatorPage() {
   const [amountRange, setAmountRange] = useState('all')
   const [sortOrder, setSortOrder] = useState('none') // 'none' | 'asc'
 
-  // 1. Filtro por nombre en tiempo real
+  // 1. Filtro por nombre 
   let filteredCredits = creditsData.filter((credit) =>
     credit.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // 2. Filtro por rango de monto (corregido)
+  // 2. Filtro por rango de monto
   if (amountRange !== 'all') {
     filteredCredits = filteredCredits.filter((credit) => {
       const max = credit.maxAmount
