@@ -1,18 +1,10 @@
-/* ==========================================================
-   Archivo: styles.css
-   Proyecto: CreditSmart
-   Descripción: Estilos personalizados para las tres páginas.
-   Autor: [Tu nombre]
-   ========================================================== */
-
-/* ---------- Paleta de colores ---------- */
 :root {
-  --primary-color: #0052cc;      /* Azul profesional */
-  --secondary-color: #25a55f;    /* Verde financiero */
-  --accent-color: #ffcc66;       /* Dorado suave */
-  --text-color: #333333;         /* Gris oscuro */
-  --text-secondary: #666666;     /* Gris medio */
-  --bg-color: #f5f7fa;           /* Fondo claro */
+  --primary-color: #0052cc;      
+  --secondary-color: #25a55f;    
+  --accent-color: #ffcc66;       
+  --text-color: #333333;         
+  --text-secondary: #666666;     
+  --bg-color: #f5f7fa;           
 }
 
 /* ---------- Estilo general ---------- */
