@@ -280,7 +280,7 @@ function RequestPage() {
 
         </div>
 
-        {/* SIMULACIÓN */}
+        {/* Simulación */}
         {monthlyFee && (
           <div className="alert alert-info mt-3">
             <h5 className="fw-bold">Simulación de Crédito</h5>

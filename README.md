@@ -90,12 +90,14 @@ Ahora conectada con **Firestore**:
 - Estado de **loading** mientras se guarda  
 - Manejo de errores con **try/catch**  
 
-### 🟦 6. Consulta de Solicitudes (MyRequestPage)
+### 🟦 6. Consulta de Solicitudes (ManageRequestPage)
 Página creada para consultar solicitudes guardadas en Firestore. Incluye funcionalidades como:
 
 - Consultar con filtros
 - Operaciones Firestore
 - Interfaz (Tabla dinámica y mensajes de carga y error)
+- Eliminar solicitud
+- Editar Solicitud
 
 ---
 
@@ -108,18 +110,25 @@ CreditSmart-React/
 ├── vite.config.js
 ├── package.json
 │
-├── src/
-│   ├── components/
-│   │   └── CreditCard.jsx
-│   ├── data/
-│   │   └── creditsData.js
-│   ├── pages/
-│   │   ├── HomePage.jsx
-│   │   ├── SimulatorPage.jsx
-│   │   └── RequestPage.jsx
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── styles.css
+src/
+ ├─ components/
+ │   ├─ Navbar.jsx
+ │   └─ CreditCard.jsx
+ ├─ pages/
+ │   ├─ SimuladorPage.jsx
+ │   ├─ RequestPage.jsx
+ │   ├─ ManageRequestPage.jsx
+ │   ├─ EditRequestPage.jsx
+ │   └─ HomePage.jsx
+ ├─ data/
+ │   ├─ creditsData.js
+ │   └─ seedData.js (solo para pruebas)
+ ├─ firebase/
+ │   └─ firebaseConfig.js
+ ├─ seed.js  (script para insertar datos)
+ ├─ App.jsx
+ ├─ main.jsx
+ └─ styles.css
 │
 └── README.md
 ```bash
