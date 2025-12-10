@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import creditsData from '../data/creditsData'
 
+// Nuevos import para firebase
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { db } from "../firebase/firebaseConfig"
+
 function RequestPage() {
   // Obtener el crédito enviado desde CreditCard.jsx
   const location = useLocation()
@@ -13,23 +17,22 @@ function RequestPage() {
   const [amount, setAmount] = useState('')
   const [term, setTerm] = useState('')
   const [creditType, setCreditType] = useState(preselected)
-  const [errors, setErrors] = useState({})
 
-  // Resumen final
+  const [errors, setErrors] = useState({})
   const [submittedData, setSubmittedData] = useState(null)
 
-  // Array temporal con solicitudes en memoria
-  const [requests, setRequests] = useState([])
+  // estado de loading para firebase
+  const [loading, setLoading] = useState(false)
+  const [firebaseError, setFirebaseError] = useState(null)
+
+  // Obtener la tasa del crédito seleccionado
   const getCreditRate = () => {
     const credit = creditsData.find(c => c.name === creditType)
     if (!credit) return null
-
-    // Se convierte tasa anual (%) a tasa mensual decimal
     return credit.annualRate / 12 / 100
   }
 
-  //  Cálculo de cuota mensual (valor derivado)
-
+  // Cálculo de cuota mensual
   const tasaMensual = getCreditRate()
 
   let monthlyFee = null
@@ -44,6 +47,7 @@ function RequestPage() {
       ? Math.max(totalToPay - amount, 0)
       : 0
 
+  // Validaciones del formulario
   const validate = () => {
     const newErrors = {}
 
@@ -59,40 +63,57 @@ function RequestPage() {
 
   // Manejo del input con formato de miles
   const handleAmountFormatted = (e) => {
-    const raw = e.target.value
-      .replace(/\./g, '')
-      .replace(/,/g, '')
-
+    const raw = e.target.value.replace(/\./g, '').replace(/,/g, '')
     setAmount(Number(raw))
   }
 
-  // Enviar formulario
-  const handleSubmit = (e) => {
+  // Enviar a Firestore
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!validate()) return
 
-    const newRequest = {
-      name,
-      email,
-      amount,
-      term,
-      creditType,
-      monthlyFee,
-      date: new Date().toLocaleString()
+    setLoading(true)
+    setFirebaseError(null)
+
+    try {
+      // Guardar documento en Firestore
+      await addDoc(collection(db, "requests"), {
+        name,
+        email,
+        amount,
+        term,
+        creditType,
+        monthlyFee,
+        createdAt: serverTimestamp(),
+      })
+
+      // Mostrar resumen
+      setSubmittedData({
+        name,
+        email,
+        amount,
+        term,
+        creditType,
+        monthlyFee,
+        date: new Date().toLocaleString(),
+      })
+
+      // Limpiar campos
+      setName('')
+      setEmail('')
+      setAmount('')
+      setTerm('')
+      setCreditType('')
+
+    } catch (err) {
+      console.error(err)
+      setFirebaseError("Ocurrió un error al guardar la solicitud. Verifica tu conexión a internet.")
+    } finally {
+      setLoading(false)
     }
-
-    // Guardar la solicitud en memoria
-    setRequests([...requests, newRequest])
-    setSubmittedData(newRequest)
-
-    // Limpiar formulario
-    setName('')
-    setEmail('')
-    setAmount('')
-    setTerm('')
-    setCreditType('')
   }
+
   return (
     <main>
       <section className="py-5 text-center bg-light">
@@ -104,10 +125,10 @@ function RequestPage() {
 
       <section className="py-4">
         <div className="container">
-          
+
           {/* FORMULARIO PRINCIPAL */}
           <form className="card p-4 shadow-sm" onSubmit={handleSubmit}>
-            
+
             <h4 className="mb-3">Datos del Solicitante</h4>
 
             {/* Nombre */}
@@ -153,7 +174,7 @@ function RequestPage() {
               {errors.creditType && <small className="text-danger">{errors.creditType}</small>}
             </div>
 
-            {/* Monto con formato */}
+            {/* Monto */}
             <div className="mb-3">
               <label className="form-label fw-semibold">Monto solicitado</label>
               <input
@@ -204,8 +225,15 @@ function RequestPage() {
             )}
 
             <div className="text-end">
-              <button className="btn btn-primary px-4">Enviar solicitud</button>
+              <button className="btn btn-primary px-4" disabled={loading}>
+                {loading ? "Enviando..." : "Enviar solicitud"}
+              </button>
             </div>
+
+            {/* Manejo de error de Firebase */}
+            {firebaseError && (
+              <p className="text-danger mt-3">{firebaseError}</p>
+            )}
           </form>
 
           {/* Resumen final */}
