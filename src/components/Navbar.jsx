@@ -51,12 +51,12 @@ function Navbar() {
                 </li>
               <li className="nav-item">
                   <NavLink
-                    to="/mis-solicitudes"
+                    to="/solicitudes"
                     className={({ isActive})=>
                       'nav-link' + (isActive ? ' active' : '')
                     }
                   >
-                    Mis Solicitudes
+                    Gestión Solicitudes
                 </NavLink>
               </li>
             </ul>
