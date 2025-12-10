@@ -48,6 +48,16 @@ function Navbar() {
                 >
                   Solicitar Crédito
                 </NavLink>
+                </li>
+              <li className="nav-item">
+                  <NavLink
+                    to="/mis-solicitudes"
+                    className={({ isActive})=>
+                      'nav-link' + (isActive ? ' active' : '')
+                    }
+                  >
+                    Mis Solicitudes
+                </NavLink>
               </li>
             </ul>
           </div>
