@@ -35,7 +35,7 @@ function RequestPage() {
   // MODAL DE ÉXITO
   const [showSuccessModal, setShowSuccessModal] = useState(false)
 
-  // Forzar que el modal siempre sea visible
+  // Asegurar que el modal sea visible al activarse
   useEffect(() => {
     if (showSuccessModal) {
       window.scrollTo({ top: 0, behavior: "smooth" })
@@ -58,7 +58,7 @@ function RequestPage() {
       const rounded = Math.round(cuota)
       setMonthlyFee(rounded)
       setTotalToPay(rounded * form.term)
-      setInterests(rounded * form.amount - form.amount)
+      setInterests(rounded * form.term - form.amount)
     }
   }, [form.amount, form.term, form.creditType])
 
@@ -73,7 +73,7 @@ function RequestPage() {
     }))
   }
 
-  // Crear solicitud en Firestore
+  // Guardar solicitud
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -100,10 +100,11 @@ function RequestPage() {
 
   return (
     <main className="container py-4">
-
       <h2 className="mb-4 text-center">Solicitar Crédito</h2>
 
       <form className="card p-4 shadow-sm" onSubmit={handleSubmit}>
+
+        {/* INFORMACIÓN PERSONAL */}
         <h4 className="text-primary mb-3">Información Personal</h4>
 
         <div className="row">
@@ -148,6 +149,8 @@ function RequestPage() {
           </div>
 
         </div>
+
+        {/* MÁS CAMPOS */}
         <div className="row">
 
           <div className="col-md-4 mb-3">
@@ -185,6 +188,8 @@ function RequestPage() {
           </div>
 
         </div>
+
+        {/* DIRECCIÓN / INGRESOS */}
         <div className="row">
 
           <div className="col-md-6 mb-3">
@@ -231,6 +236,7 @@ function RequestPage() {
 
         <hr className="my-4" />
 
+        {/* INFORMACIÓN DEL CRÉDITO */}
         <h4 className="text-primary mb-3">Información del Crédito</h4>
 
         <div className="row">
@@ -280,7 +286,7 @@ function RequestPage() {
 
         </div>
 
-        {/* Simulación */}
+        {/* SIMULACIÓN */}
         {monthlyFee && (
           <div className="alert alert-info mt-3">
             <h5 className="fw-bold">Simulación de Crédito</h5>
@@ -300,56 +306,56 @@ function RequestPage() {
           <p className="text-danger mt-3">{error}</p>
         )}
 
-        {/* Modal de guardado exitoso*/}
-        {showSuccessModal && (
-          <div
-            className="modal fade show"
-            style={{
-              display: "block",
-              backgroundColor: "rgba(0,0,0,0.5)",
-              zIndex: 9999
-            }}
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
+      </form>
 
-                <div className="modal-header">
-                  <h5 className="modal-title text-success">Solicitud creada</h5>
-                  <button
-                    className="btn-close"
-                    onClick={() => setShowSuccessModal(false)}
-                  ></button>
-                </div>
+      {/* 🌟 MODAL DE CONFIRMACIÓN DE ÉXITO */}
+      {showSuccessModal && (
+        <div
+          className="modal fade show"
+          style={{
+            display: "block",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 9999
+          }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
 
-                <div className="modal-body">
-                  <p>Tu solicitud fue registrada exitosamente.</p>
-                  <p className="text-muted">¿Qué deseas hacer ahora?</p>
-                </div>
+              <div className="modal-header">
+                <h5 className="modal-title text-success">Solicitud creada</h5>
+                <button 
+                  className="btn-close"
+                  onClick={() => setShowSuccessModal(false)}
+                ></button>
+              </div>
 
-                <div className="modal-footer">
+              <div className="modal-body">
+                <p>Tu solicitud fue registrada exitosamente.</p>
+                <p className="text-muted">¿Qué deseas hacer ahora?</p>
+              </div>
 
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setShowSuccessModal(false)}
-                  >
-                    Crear otra
-                  </button>
+              <div className="modal-footer">
 
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => navigate("/solicitudes")}
-                  >
-                    Ir al menú
-                  </button>
+                <button 
+                  className="btn btn-secondary"
+                  onClick={() => setShowSuccessModal(false)}
+                >
+                  Crear otra
+                </button>
 
-                </div>
+                <button 
+                  className="btn btn-primary"
+                  onClick={() => navigate("/solicitudes")}
+                >
+                  Ir al menú
+                </button>
 
               </div>
+
             </div>
           </div>
-        )}
-
-      </form>
+        </div>
+      )}
 
     </main>
   )
