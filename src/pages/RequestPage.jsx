@@ -1,229 +1,356 @@
-import { useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import creditsData from '../data/creditsData'
+import { useState, useEffect } from "react"
+import creditsData from "../data/creditsData"
+import { db } from "../firebase/firebaseConfig"
+import { collection, addDoc } from "firebase/firestore"
+import { useNavigate } from "react-router-dom"
 
 function RequestPage() {
-  // Obtener el crédito enviado desde CreditCard.jsx
-  const location = useLocation()
-  const preselected = location.state?.selectedCredit || ""
+  const navigate = useNavigate()
 
-  // Estados del formulario
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [amount, setAmount] = useState('')
-  const [term, setTerm] = useState('')
-  const [creditType, setCreditType] = useState(preselected)
-  const [errors, setErrors] = useState({})
-
-  // Resumen final
-  const [submittedData, setSubmittedData] = useState(null)
-
-  // Array temporal con solicitudes en memoria
-  const [requests, setRequests] = useState([])
-  const getCreditRate = () => {
-    const credit = creditsData.find(c => c.name === creditType)
-    if (!credit) return null
-
-    // Se convierte tasa anual (%) a tasa mensual decimal
-    return credit.annualRate / 12 / 100
+  const initialState = {
+    name: "",
+    documentType: "",
+    documentNumber: "",
+    birthDate: "",
+    phone: "",
+    address: "",
+    city: "",
+    maritalStatus: "",
+    email: "",
+    monthlyIncome: "",
+    creditType: "",
+    amount: "",
+    term: "",
   }
 
-  //  Cálculo de cuota mensual (valor derivado)
+  const [form, setForm] = useState(initialState)
 
-  const tasaMensual = getCreditRate()
+  const [monthlyFee, setMonthlyFee] = useState(null)
+  const [totalToPay, setTotalToPay] = useState(0)
+  const [interests, setInterests] = useState(0)
 
-  let monthlyFee = null
-  if (tasaMensual && amount > 0 && term > 0) {
-    const cuota = (amount * tasaMensual) / (1 - Math.pow(1 + tasaMensual, -term))
-    monthlyFee = Math.round(cuota)
-  }
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
 
-  const totalToPay = monthlyFee && term ? monthlyFee * term : 0
-  const interests =
-    totalToPay > 0 && amount > 0
-      ? Math.max(totalToPay - amount, 0)
-      : 0
+  // MODAL DE ÉXITO
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
-  const validate = () => {
-    const newErrors = {}
-
-    if (!name.trim()) newErrors.name = 'El nombre es obligatorio.'
-    if (!email.includes('@')) newErrors.email = 'Correo inválido.'
-    if (!amount || amount <= 0) newErrors.amount = 'Monto inválido.'
-    if (!term || term <= 0) newErrors.term = 'Plazo inválido.'
-    if (!creditType) newErrors.creditType = 'Selecciona un tipo de crédito.'
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  // Manejo del input con formato de miles
-  const handleAmountFormatted = (e) => {
-    const raw = e.target.value
-      .replace(/\./g, '')
-      .replace(/,/g, '')
-
-    setAmount(Number(raw))
-  }
-
-  // Enviar formulario
-  const handleSubmit = (e) => {
-    e.preventDefault()
-
-    if (!validate()) return
-
-    const newRequest = {
-      name,
-      email,
-      amount,
-      term,
-      creditType,
-      monthlyFee,
-      date: new Date().toLocaleString()
+  // Forzar que el modal siempre sea visible
+  useEffect(() => {
+    if (showSuccessModal) {
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
+  }, [showSuccessModal])
 
-    // Guardar la solicitud en memoria
-    setRequests([...requests, newRequest])
-    setSubmittedData(newRequest)
+  // Cálculo automático de cuota
+  useEffect(() => {
+    if (!form.creditType || !form.amount || !form.term) return
 
-    // Limpiar formulario
-    setName('')
-    setEmail('')
-    setAmount('')
-    setTerm('')
-    setCreditType('')
+    const credit = creditsData.find(c => c.name === form.creditType)
+    if (!credit) return
+
+    const tasaMensual = credit.annualRate / 12 / 100
+
+    if (form.amount > 0 && form.term > 0) {
+      const cuota = (form.amount * tasaMensual) /
+        (1 - Math.pow(1 + tasaMensual, -form.term))
+
+      const rounded = Math.round(cuota)
+      setMonthlyFee(rounded)
+      setTotalToPay(rounded * form.term)
+      setInterests(rounded * form.amount - form.amount)
+    }
+  }, [form.amount, form.term, form.creditType])
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+
+    setForm(prev => ({
+      ...prev,
+      [name]: ["amount", "term", "monthlyIncome"].includes(name)
+        ? Number(value)
+        : value
+    }))
   }
+
+  // Crear solicitud en Firestore
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    setError(null)
+
+    try {
+      await addDoc(collection(db, "requests"), {
+        ...form,
+        monthlyFee,
+        totalToPay,
+        interests,
+        createdAt: new Date()
+      })
+
+      setShowSuccessModal(true)
+      setForm(initialState)
+
+    } catch {
+      setError("Hubo un error al guardar la solicitud.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
-    <main>
-      <section className="py-5 text-center bg-light">
-        <div className="container">
-          <h1 className="mb-3">Solicitud de Crédito</h1>
-          <p className="lead">Completa la información para registrar tu solicitud.</p>
+    <main className="container py-4">
+
+      <h2 className="mb-4 text-center">Solicitar Crédito</h2>
+
+      <form className="card p-4 shadow-sm" onSubmit={handleSubmit}>
+        <h4 className="text-primary mb-3">Información Personal</h4>
+
+        <div className="row">
+
+          <div className="col-md-6 mb-3">
+            <label className="form-label fw-semibold">Nombre completo</label>
+            <input 
+              className="form-control"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="col-md-3 mb-3">
+            <label className="form-label fw-semibold">Tipo de documento</label>
+            <select
+              className="form-select"
+              name="documentType"
+              value={form.documentType}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Seleccione</option>
+              <option value="CC">Cédula de Ciudadanía</option>
+              <option value="TI">Tarjeta de Identidad</option>
+              <option value="CE">Cédula de Extranjería</option>
+              <option value="PAS">Pasaporte</option>
+            </select>
+          </div>
+
+          <div className="col-md-3 mb-3">
+            <label className="form-label fw-semibold">Número de documento</label>
+            <input
+              className="form-control"
+              name="documentNumber"
+              value={form.documentNumber}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
         </div>
-      </section>
+        <div className="row">
 
-      <section className="py-4">
-        <div className="container">
-          
-          {/* FORMULARIO PRINCIPAL */}
-          <form className="card p-4 shadow-sm" onSubmit={handleSubmit}>
-            
-            <h4 className="mb-3">Datos del Solicitante</h4>
+          <div className="col-md-4 mb-3">
+            <label className="form-label fw-semibold">Fecha de nacimiento</label>
+            <input 
+              type="date"
+              className="form-control"
+              name="birthDate"
+              value={form.birthDate}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            {/* Nombre */}
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Nombre completo</label>
-              <input
-                type="text"
-                className="form-control"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              {errors.name && <small className="text-danger">{errors.name}</small>}
-            </div>
+          <div className="col-md-4 mb-3">
+            <label className="form-label fw-semibold">Teléfono</label>
+            <input 
+              className="form-control"
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            {/* Email */}
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Correo electrónico</label>
-              <input
-                type="email"
-                className="form-control"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {errors.email && <small className="text-danger">{errors.email}</small>}
-            </div>
+          <div className="col-md-4 mb-3">
+            <label className="form-label fw-semibold">Ciudad</label>
+            <input 
+              className="form-control"
+              name="city"
+              value={form.city}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            {/* Tipo de crédito */}
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Tipo de crédito</label>
-              <select
-                className="form-select"
-                value={creditType}
-                onChange={(e) => setCreditType(e.target.value)}
-              >
-                <option value="">Selecciona una opción</option>
-                <option value="Crédito Libre Inversión">Crédito Libre Inversión</option>
-                <option value="Crédito Vehículo">Crédito Vehículo</option>
-                <option value="Crédito Vivienda">Crédito Vivienda</option>
-                <option value="Crédito Educativo">Crédito Educativo</option>
-                <option value="Crédito Empresarial">Crédito Empresarial</option>
-                <option value="Crédito de Nómina">Crédito de Nómina</option>
-              </select>
-              {errors.creditType && <small className="text-danger">{errors.creditType}</small>}
-            </div>
+        </div>
+        <div className="row">
 
-            {/* Monto con formato */}
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Monto solicitado</label>
-              <input
-                type="text"
-                className="form-control"
-                value={amount ? amount.toLocaleString('es-CO') : ""}
-                onChange={handleAmountFormatted}
-              />
-              {errors.amount && <small className="text-danger">{errors.amount}</small>}
-            </div>
+          <div className="col-md-6 mb-3">
+            <label className="form-label fw-semibold">Dirección</label>
+            <input 
+              className="form-control"
+              name="address"
+              value={form.address}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-            {/* Plazo */}
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Plazo (meses)</label>
-              <input
-                type="number"
-                className="form-control"
-                value={term}
-                onChange={(e) => setTerm(Number(e.target.value))}
-              />
-              {errors.term && <small className="text-danger">{errors.term}</small>}
-            </div>
+          <div className="col-md-3 mb-3">
+            <label className="form-label fw-semibold">Estado civil</label>
+            <select
+              className="form-select"
+              name="maritalStatus"
+              value={form.maritalStatus}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Seleccione</option>
+              <option value="Soltero">Soltero</option>
+              <option value="Casado">Casado</option>
+              <option value="Unión Libre">Unión Libre</option>
+              <option value="Divorciado">Divorciado</option>
+            </select>
+          </div>
 
-            {/* Simulación del crédito */}
-            {monthlyFee && (
-              <div className="alert alert-info">
-                <h5 className="fw-bold mb-2">Simulación del crédito</h5>
+          <div className="col-md-3 mb-3">
+            <label className="form-label fw-semibold">Ingresos mensuales</label>
+            <input 
+              type="number"
+              className="form-control"
+              name="monthlyIncome"
+              value={form.monthlyIncome}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-                <p className="mb-1">
-                  <strong>Cuota mensual estimada:</strong> ${monthlyFee.toLocaleString()}
-                </p>
+        </div>
 
-                <p className="mb-1">
-                  <strong>Total a pagar:</strong> ${totalToPay.toLocaleString()}
-                </p>
+        <hr className="my-4" />
 
-                <p className="mb-3">
-                  <strong>Intereses estimados:</strong> ${interests.toLocaleString()}
-                </p>
+        <h4 className="text-primary mb-3">Información del Crédito</h4>
 
-                <hr />
+        <div className="row">
 
-                <p className="mb-0">
-                  Si estás de acuerdo con esta simulación y deseas continuar con la solicitud,
-                  completa los campos restantes y haz clic en <strong>Enviar solicitud</strong>.
-                </p>
+          <div className="col-md-4 mb-3">
+            <label className="form-label fw-semibold">Tipo de crédito</label>
+            <select
+              className="form-select"
+              name="creditType"
+              value={form.creditType}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Seleccione</option>
+              <option value="Crédito Libre Inversión">Libre Inversión</option>
+              <option value="Crédito Vehículo">Vehículo</option>
+              <option value="Crédito Vivienda">Vivienda</option>
+              <option value="Crédito Educativo">Educativo</option>
+              <option value="Crédito Empresarial">Empresarial</option>
+              <option value="Crédito de Nómina">Nómina</option>
+            </select>
+          </div>
+
+          <div className="col-md-4 mb-3">
+            <label className="form-label fw-semibold">Monto</label>
+            <input
+              type="number"
+              className="form-control"
+              name="amount"
+              value={form.amount}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="col-md-4 mb-3">
+            <label className="form-label fw-semibold">Plazo (meses)</label>
+            <input
+              type="number"
+              className="form-control"
+              name="term"
+              value={form.term}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+        </div>
+
+        {/* Simulación */}
+        {monthlyFee && (
+          <div className="alert alert-info mt-3">
+            <h5 className="fw-bold">Simulación de Crédito</h5>
+            <p><strong>Cuota mensual:</strong> ${monthlyFee.toLocaleString()}</p>
+            <p><strong>Total a pagar:</strong> ${totalToPay.toLocaleString()}</p>
+            <p><strong>Intereses:</strong> ${interests.toLocaleString()}</p>
+          </div>
+        )}
+
+        <div className="text-end mt-4">
+          <button className="btn btn-primary px-4" disabled={saving}>
+            {saving ? "Guardando..." : "Enviar solicitud"}
+          </button>
+        </div>
+
+        {error && (
+          <p className="text-danger mt-3">{error}</p>
+        )}
+
+        {/* Modal de guardado exitoso*/}
+        {showSuccessModal && (
+          <div
+            className="modal fade show"
+            style={{
+              display: "block",
+              backgroundColor: "rgba(0,0,0,0.5)",
+              zIndex: 9999
+            }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+
+                <div className="modal-header">
+                  <h5 className="modal-title text-success">Solicitud creada</h5>
+                  <button
+                    className="btn-close"
+                    onClick={() => setShowSuccessModal(false)}
+                  ></button>
+                </div>
+
+                <div className="modal-body">
+                  <p>Tu solicitud fue registrada exitosamente.</p>
+                  <p className="text-muted">¿Qué deseas hacer ahora?</p>
+                </div>
+
+                <div className="modal-footer">
+
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowSuccessModal(false)}
+                  >
+                    Crear otra
+                  </button>
+
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => navigate("/solicitudes")}
+                  >
+                    Ir al menú
+                  </button>
+
+                </div>
+
               </div>
-            )}
-
-            <div className="text-end">
-              <button className="btn btn-primary px-4">Enviar solicitud</button>
             </div>
-          </form>
+          </div>
+        )}
 
-          {/* Resumen final */}
-          {submittedData && (
-            <div className="alert alert-success mt-4">
-              <h5 className="fw-bold">Solicitud enviada con éxito</h5>
-              <p><strong>Nombre:</strong> {submittedData.name}</p>
-              <p><strong>Correo:</strong> {submittedData.email}</p>
-              <p><strong>Tipo crédito:</strong> {submittedData.creditType}</p>
-              <p><strong>Monto:</strong> ${submittedData.amount.toLocaleString()}</p>
-              <p><strong>Plazo:</strong> {submittedData.term} meses</p>
-              <p><strong>Cuota mensual:</strong> ${submittedData.monthlyFee?.toLocaleString()}</p>
-              <p><strong>Fecha:</strong> {submittedData.date}</p>
-            </div>
-          )}
+      </form>
 
-        </div>
-      </section>
     </main>
   )
 }
