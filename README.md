@@ -170,16 +170,20 @@ Archivo **.env** (Se debe crear localmente):
 ```bash
 git clone https://github.com/usuario/tu-repo.git
 cd creditsmart-react
-```bash
-## 2️⃣ Instalar Dependiencias
-npm install
+```
 
+## 2️⃣ Instalar Dependiencias
+```bash
+npm install
+```
 ## 3️⃣ Configurar Firebase
 Crear .env con las credenciales de Firebase, tomar como referencia el archivo .env.example
 
 ##4️⃣ Ejecutar el proyecto
+```bash
 npm run dev
 http://localhost:5173
+```
 
 # 📸 Capturas de pantalla
 
