@@ -131,7 +131,9 @@ src/
  └─ styles.css
 │
 └── README.md
-```bash
+
+```
+---
 
 ## 🗄️ Estructura de Firestore
 
