@@ -188,13 +188,13 @@ http://localhost:5173
 # 📸 Capturas de pantalla
 
 ### Página principal - Catálogo de Créditos
-![Captura página principal](img/pagina-index.png)
+![Captura página principal](public/img/pagina-index.png)
 
 ### Simulador de Créditos
-![Captura simulador](img/pagina-simulador.png)
+![Captura simulador](public/img/pagina-simulador.png)
 
 ### Formulario de Solicitud
-![Captura formulario](img/pagina-solicitar.png)
+![Captura formulario](public/img/pagina-solicitar.png)
 
 ## 🎨 Créditos de imágenes e íconos
 
